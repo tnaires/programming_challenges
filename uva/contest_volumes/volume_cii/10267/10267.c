@@ -58,8 +58,121 @@ table H(table t, int x1, int x2, int y, char c) {
 	return K(t, x1, y, x2, y, c);
 }
 
-table F(table t, int x, int y, char c) {
+table copy(table t) {
+	table result;
+	result.rows = t.rows;
+	result.cols = t.cols;
+	int i, j;
 	
+	for (i = 0; i < t.rows; i++) {
+		for (j = 0; j < t.cols; j++) {
+			result.pixels[i][j] = t.pixels[i][j];
+		}
+	}
+	
+	return result;
+}
+
+table paint(table t, int x, int y, char c) {
+	if (x >= 0 && x < t.cols && y >= 0 && y < t.rows) {
+		t.pixels[y][x] = c;
+	}
+	
+	return t;
+}
+
+table F(table t, int x, int y, char c) {
+	table original = copy(t);
+	x -= 1;
+	y -= 1;
+	t.pixels[y][x] = c;
+	int search = 1, painted = 0;
+	
+	do {
+		painted = 0;
+		
+		int sx = x - search;
+		int sy = y;
+		
+		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
+			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
+				t.pixels[sy][sx] = c;
+				painted = 1;
+			}
+		}
+		
+		sx = x - search;
+		sy = y - search;
+		
+		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
+			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
+				t.pixels[sy][sx] = c;
+				painted = 1;
+			}
+		}
+		
+		sx = x;
+		sy = y - search;
+		
+		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
+			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
+				t.pixels[sy][sx] = c;
+				painted = 1;
+			}
+		}
+		
+		sx = x + search;
+		sy = y - search;
+		
+		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
+			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
+				t.pixels[sy][sx] = c;
+				painted = 1;
+			}
+		}
+		
+		sx = x + search;
+		sy = y;
+		
+		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
+			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
+				t.pixels[sy][sx] = c;
+				painted = 1;
+			}
+		}
+		
+		sx = x + search;
+		sy = y + search;
+		
+		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
+			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
+				t.pixels[sy][sx] = c;
+				painted = 1;
+			}
+		}
+		
+		sx = x;
+		sy = y + search;
+		
+		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
+			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
+				t.pixels[sy][sx] = c;
+				painted = 1;
+			}
+		}
+		
+		sx = x - search;
+		sy = y + search;
+		
+		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
+			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
+				t.pixels[sy][sx] = c;
+				painted = 1;
+			}
+		}
+		
+		search++;
+	} while (painted);
 	
 	return t;
 }
