@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 #define CHARS "abcdefghijklmnopqrstuvwxyz"
-#define FILE_LENGTH 5000
-#define WORD_COUNT 200
+#define FILE_LENGTH 1000000
+#define WORD_COUNT 5000
 #define DELIMITERS " \n"
 
 int cmp(const void *a, const void *b) {
