@@ -7,6 +7,7 @@
 #define DELIMITERS " \n"
 #define TABLE_SIZE 250
 #define DEFAULT_COLOR 'O'
+#define FILENAME_LENGTH 12
 
 typedef struct _table {
 	char pixels[TABLE_SIZE][TABLE_SIZE];
@@ -39,10 +40,30 @@ table L(table t, int x, int y, char c) {
 }
 
 table K(table t, int x1, int y1, int x2, int y2, char c) {
+	int xleft, xright;
+	
+	if (x1 < x2) {
+		xleft = x1;
+		xright = x2;
+	} else {
+		xleft = x2;
+		xright = x1;
+	}
+	
+	int ytop, ybottom;
+	
+	if (y1 < y2) {
+		ytop = y1;
+		ybottom = y2;
+	} else {
+		ytop = y2;
+		ybottom = y1;
+	}
+	
 	int i, j;
 	
-	for (i = x1 - 1; i < x2; i++) {
-		for (j = y1 - 1; j < y2; j++) {
+	for (i = xleft - 1; i < xright; i++) {
+		for (j = ytop - 1; j < ybottom; j++) {
 			t.pixels[j][i] = c;
 		}
 	}
@@ -73,101 +94,51 @@ table copy(table t) {
 	return result;
 }
 
-table paint(table t, int x, int y, char c) {
-	if (x >= 0 && x < t.cols && y >= 0 && y < t.rows) {
-		t.pixels[y][x] = c;
-	}
-	
-	return t;
-}
-
 table F(table t, int x, int y, char c) {
 	table original = copy(t);
 	x -= 1;
 	y -= 1;
 	t.pixels[y][x] = c;
-	int search = 1, painted = 0;
+	int search = 1, painted;
 	
 	do {
 		painted = 0;
 		
-		int sx = x - search;
-		int sy = y;
+		int sx1 = x - search;
+		int sx2 = x + search;
+		int sy1 = y - search;
+		int sy2 = y + search;
+		int i;
 		
-		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
-			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
-				t.pixels[sy][sx] = c;
-				painted = 1;
+		for (i = sy1; i <= sy2; i++) {
+			if (sx1 >= 0 && sx1 < t.cols && i >= 0 && i < t.rows) {
+				if (original.pixels[y][x] == t.pixels[i][sx1]) {
+					t.pixels[i][sx1] = c;
+					painted = 1;
+				}
+			}
+			
+			if (sx2 >= 0 && sx2 < t.cols && i >= 0 && i < t.rows) {
+				if (original.pixels[y][x] == t.pixels[i][sx2]) {
+					t.pixels[i][sx2] = c;
+					painted = 1;
+				}
 			}
 		}
 		
-		sx = x - search;
-		sy = y - search;
-		
-		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
-			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
-				t.pixels[sy][sx] = c;
-				painted = 1;
+		for (i = sx1; i <= sx2; i++) {
+			if (i >= 0 && i < t.cols && sy1 >= 0 && sy1 < t.rows) {
+				if (original.pixels[y][x] == t.pixels[sy1][i]) {
+					t.pixels[sy1][i] = c;
+					painted = 1;
+				}
 			}
-		}
-		
-		sx = x;
-		sy = y - search;
-		
-		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
-			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
-				t.pixels[sy][sx] = c;
-				painted = 1;
-			}
-		}
-		
-		sx = x + search;
-		sy = y - search;
-		
-		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
-			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
-				t.pixels[sy][sx] = c;
-				painted = 1;
-			}
-		}
-		
-		sx = x + search;
-		sy = y;
-		
-		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
-			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
-				t.pixels[sy][sx] = c;
-				painted = 1;
-			}
-		}
-		
-		sx = x + search;
-		sy = y + search;
-		
-		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
-			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
-				t.pixels[sy][sx] = c;
-				painted = 1;
-			}
-		}
-		
-		sx = x;
-		sy = y + search;
-		
-		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
-			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
-				t.pixels[sy][sx] = c;
-				painted = 1;
-			}
-		}
-		
-		sx = x - search;
-		sy = y + search;
-		
-		if (sx >= 0 && sx < t.cols && sy >= 0 && sy < t.rows) {
-			if (original.pixels[sy][sx] == t.pixels[sy][sx]) {
-				t.pixels[sy][sx] = c;
-				painted = 1;
+			
+			if (i >= 0 && i < t.cols && sy2 >= 0 && sy2 < t.rows) {
+				if (original.pixels[y][x] == t.pixels[sy2][i]) {
+					t.pixels[sy2][i] = c;
+					painted = 1;
+				}
 			}
 		}
 		
@@ -178,8 +149,11 @@ table F(table t, int x, int y, char c) {
 }
 
 void S(table t, char filename[]) {
-	printf("%s\n", filename);
 	int i, j;
+	char filename_dos[FILENAME_LENGTH + 1];
+	
+	strncpy(filename_dos, filename, FILENAME_LENGTH);
+	printf("%s\n", filename_dos);
 	
 	for (i = 0; i < t.rows; i++) {
 		for (j = 0; j < t.cols; j++) {
@@ -253,6 +227,7 @@ int main() {
 				S(t, args[0]);
 				break;
 			case 'X':
+				return 0;
 				break;
 		}
 	}
