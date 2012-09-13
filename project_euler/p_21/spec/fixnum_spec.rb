@@ -21,7 +21,7 @@ describe Fixnum do
 
   describe :amicable do
     it { 284.amicable?(220).should be_true }
-    it { 6.amicable?(6).should_not be_true }
-    it { 28.amicable?(28).should_not be_true }
+    it { 6.amicable?(6).should be_false }
+    it { 28.amicable?(28).should  be_false }
   end
 end
