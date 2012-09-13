@@ -11,7 +11,17 @@ describe Fixnum do
     it { 284.divisors.should == [1, 2, 4, 71, 142, 284] }
   end
 
+  describe :proper_divisors do
+    it "should return divisors that are not equal to n" do
+      expected_divisors = 10.divisors
+      expected_divisors.pop
+      10.proper_divisors.should == expected_divisors
+    end
+  end
+
   describe :amicable do
     it { 284.amicable?(220).should be_true }
+    it { 6.amicable?(6).should_not be_true }
+    it { 28.amicable?(28).should_not be_true }
   end
 end

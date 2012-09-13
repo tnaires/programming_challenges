@@ -1,5 +1,5 @@
 task :default => :run
 
 task :run do
-  puts 'Run!'
+  sh %{ ruby app/main.rb  }
 end
