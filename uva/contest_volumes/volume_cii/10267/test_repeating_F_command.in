@@ -1,0 +1,20 @@
+I 5 5
+S one.bmp
+L 1 1 A
+L 5 5 A
+L 2 3 A
+S two.bmp
+V 1 1 5 B
+V 5 1 5 C
+S three.bmp
+H 1 5 1 D
+H 1 5 5 E
+S four.bmp
+F 2 2 H
+F 2 2 H
+S five.bmp
+K 1 1 5 5 F
+S six.bmp
+F 5 5 G
+S seven.bmp
+X

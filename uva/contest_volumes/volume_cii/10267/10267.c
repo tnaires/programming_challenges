@@ -1,14 +1,111 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define CMD_LENGTH 50
 #define ARG_LENGTH 5
 #define DELIMITERS " \n"
 #define TABLE_SIZE 250
 #define DEFAULT_COLOR 'O'
-#define FILENAME_LENGTH 12
+#define FILENAME_LENGTH 13
 
+/* Queue */
+typedef struct node {
+  int x, y;
+  struct node *next;
+} *Node;
+
+typedef struct node *Queue;
+
+Node new_node(int x, int y) {
+  Node n = (Node) malloc(sizeof(struct node));
+  n->x = x;
+  n->y = y;
+  n->next = NULL;
+
+  return n;
+}
+
+Queue new_queue() {
+  Queue q = (Queue) malloc(sizeof(struct node));
+  q = NULL;
+  return q;
+}
+
+Queue enqueue(Queue q, int x, int y) {
+  Node n = new_node(x, y);
+
+  if (q == NULL) {
+    q = n;
+  } else {
+    n->next = q;
+    q = n;
+  }
+
+  return q;
+}
+
+Node first(Queue q) {
+  if (q) {
+    Node current = q;
+
+    while (current->next) {
+      current = current->next;
+    }
+
+    return current;
+  } else {
+    return NULL;
+  }
+}
+
+Queue dequeue(Queue q) {
+  if (q == NULL) {
+    return NULL;
+  }
+
+  Node current = q;
+  Node prev = NULL;
+
+  while (current->next) {
+    prev = current;
+    current = current->next;
+  }
+
+  if (prev) {
+    prev->next = NULL;
+  } else {
+    q = NULL;
+  }
+
+  free(current);
+  return q;
+}
+
+void print_queue(Queue q) {
+  if (q) {
+    Node curr = q;
+
+    while (curr) {
+      printf("x = %d\n", curr->x);
+      curr = curr->next;
+    }
+  } else {
+    printf("Queue is empty.\n");
+  }
+}
+
+void free_queue(Queue q) {
+  Node n = dequeue(q);
+
+  while (n != NULL) {
+    free(n);
+    n = dequeue(q);
+  }
+}
+
+/* Table */
 typedef struct _table {
 	char pixels[TABLE_SIZE][TABLE_SIZE];
 	int rows, cols;
@@ -35,7 +132,7 @@ table I(int m, int n) {
 }
 
 table L(table t, int x, int y, char c) {
-	t.pixels[y - 1][x - 1] = c;
+	t.pixels[y - 1][x - 1] = toupper(c);
 	return t;
 }
 
@@ -64,7 +161,7 @@ table K(table t, int x1, int y1, int x2, int y2, char c) {
 	
 	for (i = xleft - 1; i < xright; i++) {
 		for (j = ytop - 1; j < ybottom; j++) {
-			t.pixels[j][i] = c;
+			t.pixels[j][i] = toupper(c);
 		}
 	}
 	
@@ -79,73 +176,60 @@ table H(table t, int x1, int x2, int y, char c) {
 	return K(t, x1, y, x2, y, c);
 }
 
-table copy(table t) {
-	table result;
-	result.rows = t.rows;
-	result.cols = t.cols;
-	int i, j;
-	
-	for (i = 0; i < t.rows; i++) {
-		for (j = 0; j < t.cols; j++) {
-			result.pixels[i][j] = t.pixels[i][j];
-		}
-	}
-	
-	return result;
+table fill_table(table t, int x, int y, char old_color, char new_color) {
+  Queue q = new_queue();
+  q = enqueue(q, x, y);
+  Node n = first(q);
+
+  while (n) {
+    int n_x = n->x, n_y = n->y;
+    int left, right;
+
+    for (left = n_x; left >= 0; left--) {
+      if (t.pixels[n_y][left] != old_color) {
+        break;
+      }
+    }
+
+    for (right = n_x; right < t.cols; right++) {
+      if (t.pixels[n_y][right] != old_color) {
+        break;
+      }
+    }
+
+    q = dequeue(q);
+    left++; right--;
+    int i;
+
+    for (i = left; i <= right; i++) {
+      t.pixels[n_y][i] = new_color;
+
+      if (n_y - 1 >= 0 && t.pixels[n_y - 1][i] == old_color) {
+        q = enqueue(q, i, n_y - 1);
+      }
+
+      if (n_y + 1 < t.rows && t.pixels[n_y + 1][i] == old_color) {
+        q = enqueue(q, i, n_y + 1);
+      }
+    }
+
+    n = first(q);
+  }
+
+  free_queue(q);
+  return t;
 }
 
-table F(table t, int x, int y, char c) {
-	table original = copy(t);
-	x -= 1;
-	y -= 1;
-	t.pixels[y][x] = c;
-	int search = 1, painted;
-	
-	do {
-		painted = 0;
-		
-		int sx1 = x - search;
-		int sx2 = x + search;
-		int sy1 = y - search;
-		int sy2 = y + search;
-		int i;
-		
-		for (i = sy1; i <= sy2; i++) {
-			if (sx1 >= 0 && sx1 < t.cols && i >= 0 && i < t.rows) {
-				if (original.pixels[y][x] == t.pixels[i][sx1]) {
-					t.pixels[i][sx1] = c;
-					painted = 1;
-				}
-			}
-			
-			if (sx2 >= 0 && sx2 < t.cols && i >= 0 && i < t.rows) {
-				if (original.pixels[y][x] == t.pixels[i][sx2]) {
-					t.pixels[i][sx2] = c;
-					painted = 1;
-				}
-			}
-		}
-		
-		for (i = sx1; i <= sx2; i++) {
-			if (i >= 0 && i < t.cols && sy1 >= 0 && sy1 < t.rows) {
-				if (original.pixels[y][x] == t.pixels[sy1][i]) {
-					t.pixels[sy1][i] = c;
-					painted = 1;
-				}
-			}
-			
-			if (i >= 0 && i < t.cols && sy2 >= 0 && sy2 < t.rows) {
-				if (original.pixels[y][x] == t.pixels[sy2][i]) {
-					t.pixels[sy2][i] = c;
-					painted = 1;
-				}
-			}
-		}
-		
-		search++;
-	} while (painted);
-	
-	return t;
+table F(table t, int x, int y, char new_color) {
+  x--; y--;
+  new_color = toupper(new_color);
+  char old_color = t.pixels[y][x];
+
+  if (old_color == new_color) {
+    return t;
+  }
+
+  return fill_table(t, x, y, old_color, new_color);
 }
 
 void S(table t, char filename[]) {
@@ -231,6 +315,6 @@ int main() {
 				break;
 		}
 	}
-	
+
 	return 0;
 }
