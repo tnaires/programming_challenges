@@ -39,7 +39,7 @@ Computer initialize_computer() {
   return c;
 }
 
-Computer load_program(Computer c) {
+Computer load_program_from_stdin(Computer c) {
   int i;
   char line[LINE_SIZE];
 
@@ -89,7 +89,7 @@ int main() {
 
   for (i = 0; i < number_of_cases; i++) {
     Computer c = initialize_computer();
-    c = load_program(c);
+    c = load_program_from_stdin(c);
     printf("%d\n", run_program(c));
   }
 
