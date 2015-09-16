@@ -152,38 +152,43 @@ Computer _9sa(Computer c, int s, int a) {
 
 Computer run_current_instruction(Computer c) {
   int instruction = c.ram[c.instruction_pointer];
-  int command = instruction % 1000 / 100;
-  int arg1 = instruction % 100 / 10;
-  int arg2 = instruction % 10;
 
-  switch (command) {
-    case 0:
-      c = _0ds(c, arg1, arg2);
-      break;
-    case 2:
-      c = _2dn(c, arg1, arg2);
-      break;
-    case 3:
-      c = _3dn(c, arg1, arg2);
-      break;
-    case 4:
-      c = _4dn(c, arg1, arg2);
-      break;
-    case 5:
-      c = _5ds(c, arg1, arg2);
-      break;
-    case 6:
-      c = _6ds(c, arg1, arg2);
-      break;
-    case 7:
-      c = _7ds(c, arg1, arg2);
-      break;
-    case 8:
-      c = _8da(c, arg1, arg2);
-      break;
-    case 9:
-      c = _9sa(c, arg1, arg2);
-      break;
+  if (instruction != 0) {
+    int command = instruction % 1000 / 100;
+    int arg1 = instruction % 100 / 10;
+    int arg2 = instruction % 10;
+
+    switch (command) {
+      case 0:
+        c = _0ds(c, arg1, arg2);
+        break;
+      case 2:
+        c = _2dn(c, arg1, arg2);
+        break;
+      case 3:
+        c = _3dn(c, arg1, arg2);
+        break;
+      case 4:
+        c = _4dn(c, arg1, arg2);
+        break;
+      case 5:
+        c = _5ds(c, arg1, arg2);
+        break;
+      case 6:
+        c = _6ds(c, arg1, arg2);
+        break;
+      case 7:
+        c = _7ds(c, arg1, arg2);
+        break;
+      case 8:
+        c = _8da(c, arg1, arg2);
+        break;
+      case 9:
+        c = _9sa(c, arg1, arg2);
+        break;
+    }
+  } else {
+    c.instruction_pointer++;
   }
 
   c.instruction_counter++;
@@ -197,7 +202,7 @@ Computer run_program(Computer c) {
     if (instruction == 100) {
       c.instruction_counter++;
       break;
-    } else if (instruction != 0) {
+    } else {
       c = run_current_instruction(c);
     }
   }
