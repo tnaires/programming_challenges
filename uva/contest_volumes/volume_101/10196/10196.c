@@ -23,10 +23,6 @@
 typedef enum { false, true } bool;
 typedef enum { no_king, white_king, black_king } result;
 
-typedef struct position {
-  int x, y;
-} Position;
-
 typedef struct board {
   char pieces[SQUARE_COUNT][SQUARE_COUNT];
 } Board;
@@ -85,43 +81,13 @@ bool check_black_pawn(Board b, int i, int j) {
   return false;
 }
 
-bool check_black_knight(Board b, int i, int j) {
+bool check_white_pawn(Board b, int i, int j) {
   if (i - 1 >= 0) {
-    if (j - 2 >= 0 && b.pieces[i - 1][j - 2] == WHITE_KING) {
+    if (j - 1 >= 0 && b.pieces[i - 1][j - 1] == BLACK_KING) {
       return true;
     }
 
-    if (j + 2 < SQUARE_COUNT && b.pieces[i - 1][j + 2] == WHITE_KING) {
-      return true;
-    }
-  }
-
-  if (i - 2 >= 0) {
-    if (j - 1 >= 0 && b.pieces[i - 2][j - 1] == WHITE_KING) {
-      return true;
-    }
-
-    if (j + 1 < SQUARE_COUNT && b.pieces[i - 2][j + 1] == WHITE_KING) {
-      return true;
-    }
-  }
-
-  if (i + 1 < SQUARE_COUNT) {
-    if (j - 2 >= 0 && b.pieces[i + 1][j - 2] == WHITE_KING) {
-      return true;
-    }
-
-    if (j + 2 < SQUARE_COUNT && b.pieces[i + 1][j + 2] == WHITE_KING) {
-      return true;
-    }
-  }
-
-  if (i + 2 < SQUARE_COUNT) {
-    if (j - 1 >= 0 && b.pieces[i + 2][j - 1] == WHITE_KING) {
-      return true;
-    }
-
-    if (j + 1 < SQUARE_COUNT && b.pieces[i + 2][j + 1] == WHITE_KING) {
+    if (j + 1 < SQUARE_COUNT && b.pieces[i - 1][j + 1] == BLACK_KING) {
       return true;
     }
   }
@@ -129,7 +95,51 @@ bool check_black_knight(Board b, int i, int j) {
   return false;
 }
 
-bool check_black_bishop(Board b, int i, int j, bool only_one_step) {
+bool check_knight(Board b, int i, int j, char target_king) {
+  if (i - 1 >= 0) {
+    if (j - 2 >= 0 && b.pieces[i - 1][j - 2] == target_king) {
+      return true;
+    }
+
+    if (j + 2 < SQUARE_COUNT && b.pieces[i - 1][j + 2] == target_king) {
+      return true;
+    }
+  }
+
+  if (i - 2 >= 0) {
+    if (j - 1 >= 0 && b.pieces[i - 2][j - 1] == target_king) {
+      return true;
+    }
+
+    if (j + 1 < SQUARE_COUNT && b.pieces[i - 2][j + 1] == target_king) {
+      return true;
+    }
+  }
+
+  if (i + 1 < SQUARE_COUNT) {
+    if (j - 2 >= 0 && b.pieces[i + 1][j - 2] == target_king) {
+      return true;
+    }
+
+    if (j + 2 < SQUARE_COUNT && b.pieces[i + 1][j + 2] == target_king) {
+      return true;
+    }
+  }
+
+  if (i + 2 < SQUARE_COUNT) {
+    if (j - 1 >= 0 && b.pieces[i + 2][j - 1] == target_king) {
+      return true;
+    }
+
+    if (j + 1 < SQUARE_COUNT && b.pieces[i + 2][j + 1] == target_king) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool check_bishop(Board b, int i, int j, char target_king, bool only_one_step) {
   int a, count;
   bool look_left = true, look_right = true;
 
@@ -139,7 +149,7 @@ bool check_black_bishop(Board b, int i, int j, bool only_one_step) {
     if (look_left && left >= 0) {
       char piece = b.pieces[a][left];
 
-      if (piece == WHITE_KING) {
+      if (piece == target_king) {
         return true;
       } else if (piece != BLANK_SQUARE) {
         look_left = false;
@@ -151,7 +161,7 @@ bool check_black_bishop(Board b, int i, int j, bool only_one_step) {
     if (look_right && right < SQUARE_COUNT) {
       char piece = b.pieces[a][right];
 
-      if (piece == WHITE_KING) {
+      if (piece == target_king) {
         return true;
       } else if (piece != BLANK_SQUARE) {
         look_right = false;
@@ -176,7 +186,7 @@ bool check_black_bishop(Board b, int i, int j, bool only_one_step) {
     if (look_left && left >= 0) {
       char piece = b.pieces[a][left];
 
-      if (piece == WHITE_KING) {
+      if (piece == target_king) {
         return true;
       } else if (piece != BLANK_SQUARE) {
         look_left = false;
@@ -188,7 +198,7 @@ bool check_black_bishop(Board b, int i, int j, bool only_one_step) {
     if (look_right && right < SQUARE_COUNT) {
       char piece = b.pieces[a][right];
 
-      if (piece == WHITE_KING) {
+      if (piece == target_king) {
         return true;
       } else if (piece != BLANK_SQUARE) {
         look_right = false;
@@ -207,7 +217,7 @@ bool check_black_bishop(Board b, int i, int j, bool only_one_step) {
   return false;
 }
 
-bool check_black_rook(Board b, int i, int j, bool only_one_step) {
+bool check_rook(Board b, int i, int j, char target_king, bool only_one_step) {
   int a;
   bool look_up = true, look_down = true, look_left = true, look_right = true;
 
@@ -215,7 +225,7 @@ bool check_black_rook(Board b, int i, int j, bool only_one_step) {
     if (look_up && i - a >= 0) {
       char piece = b.pieces[i - a][j];
 
-      if (piece == WHITE_KING) {
+      if (piece == target_king) {
         return true;
       } else if (piece != BLANK_SQUARE) {
         look_up = false;
@@ -225,7 +235,7 @@ bool check_black_rook(Board b, int i, int j, bool only_one_step) {
     if (look_down && i + a < SQUARE_COUNT) {
       char piece = b.pieces[i + a][j];
 
-      if (piece == WHITE_KING) {
+      if (piece == target_king) {
         return true;
       } else if (piece != BLANK_SQUARE) {
         look_down = false;
@@ -235,7 +245,7 @@ bool check_black_rook(Board b, int i, int j, bool only_one_step) {
     if (look_left && j - a >= 0) {
       char piece = b.pieces[i][j - a];
 
-      if (piece == WHITE_KING) {
+      if (piece == target_king) {
         return true;
       } else if (piece != BLANK_SQUARE) {
         look_left = false;
@@ -245,7 +255,7 @@ bool check_black_rook(Board b, int i, int j, bool only_one_step) {
     if (look_right && j + a < SQUARE_COUNT) {
       char piece = b.pieces[i][j + a];
 
-      if (piece == WHITE_KING) {
+      if (piece == target_king) {
         return true;
       } else if (piece != BLANK_SQUARE) {
         look_right = false;
@@ -264,12 +274,12 @@ bool check_black_rook(Board b, int i, int j, bool only_one_step) {
   return false;
 }
 
-bool check_black_queen(Board b, int i, int j) {
-  return check_black_rook(b, i, j, false) || check_black_bishop(b, i, j, false);
+bool check_queen(Board b, int i, int j, char target_king) {
+  return check_rook(b, i, j, target_king, false) || check_bishop(b, i, j, target_king, false);
 }
 
-bool check_black_king(Board b, int i, int j) {
-  return check_black_rook(b, i, j, true) || check_black_bishop(b, i, j, true);
+bool check_king(Board b, int i, int j, char target_king) {
+  return check_rook(b, i, j, target_king, true) || check_bishop(b, i, j, target_king, true);
 }
 
 result check_kings(Board b) {
@@ -286,33 +296,69 @@ result check_kings(Board b) {
           }
 
           break;
+        case WHITE_PAWN:
+          if (check_white_pawn(b, i, j)) {
+            return black_king;
+          }
+
+          break;
         case BLACK_KNIGHT:
-          if (check_black_knight(b, i, j)) {
+          if (check_knight(b, i, j, WHITE_KING)) {
             return white_king;
+          }
+
+          break;
+        case WHITE_KNIGHT:
+          if (check_knight(b, i, j, BLACK_KING)) {
+            return black_king;
           }
 
           break;
         case BLACK_BISHOP:
-          if (check_black_bishop(b, i, j, false)) {
+          if (check_bishop(b, i, j, WHITE_KING, false)) {
             return white_king;
+          }
+
+          break;
+        case WHITE_BISHOP:
+          if (check_bishop(b, i, j, BLACK_KING, false)) {
+            return black_king;
           }
 
           break;
         case BLACK_ROOK:
-          if (check_black_rook(b, i, j, false)) {
+          if (check_rook(b, i, j, WHITE_KING, false)) {
             return white_king;
+          }
+
+          break;
+        case WHITE_ROOK:
+          if (check_rook(b, i, j, BLACK_KING, false)) {
+            return black_king;
           }
 
           break;
         case BLACK_QUEEN:
-          if (check_black_queen(b, i, j)) {
+          if (check_queen(b, i, j, WHITE_KING)) {
             return white_king;
           }
 
           break;
+        case WHITE_QUEEN:
+          if (check_queen(b, i, j, BLACK_KING)) {
+            return black_king;
+          }
+
+          break;
         case BLACK_KING:
-          if (check_black_king(b, i, j)) {
+          if (check_king(b, i, j, WHITE_KING)) {
             return white_king;
+          }
+
+          break;
+        case WHITE_KING:
+          if (check_king(b, i, j, BLACK_KING)) {
+            return black_king;
           }
 
           break;
